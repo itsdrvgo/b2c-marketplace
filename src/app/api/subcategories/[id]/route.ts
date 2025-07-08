@@ -1,0 +1,94 @@
+import { env } from "@/../env";
+import { ERROR_MESSAGES } from "@/config/const";
+import { queries } from "@/lib/db/queries";
+import { cache } from "@/lib/redis/methods";
+import { AppError, CResponse, handleError, slugify } from "@/lib/utils";
+import { updateSubcategorySchema } from "@/lib/validations";
+import { auth } from "@clerk/nextjs/server";
+import { NextRequest } from "next/server";
+
+interface RouteProps {
+    params: Promise<{ id: string }>;
+}
+
+export async function GET(_: NextRequest, { params }: RouteProps) {
+    try {
+        const { id } = await params;
+
+        const data = await cache.subcategory.get(id);
+        if (!data) throw new AppError(ERROR_MESSAGES.NOT_FOUND, "NOT_FOUND");
+
+        return CResponse({ data });
+    } catch (err) {
+        return handleError(err);
+    }
+}
+
+export async function PATCH(req: NextRequest, { params }: RouteProps) {
+    try {
+        if (env.IS_API_AUTHENTICATED) {
+            const { userId } = await auth();
+            if (!userId)
+                throw new AppError(ERROR_MESSAGES.UNAUTHORIZED, "UNAUTHORIZED");
+
+            const user = await cache.user.get(userId);
+            if (!user || user.role !== "admin")
+                throw new AppError(ERROR_MESSAGES.FORBIDDEN, "FORBIDDEN");
+        }
+
+        const { id } = await params;
+        const body = await req.json();
+        const parsed = updateSubcategorySchema.parse(body);
+
+        const existingData = await cache.subcategory.get(id);
+        if (!existingData)
+            throw new AppError(ERROR_MESSAGES.NOT_FOUND, "NOT_FOUND");
+
+        const slug = parsed.name ? slugify(parsed.name) : existingData.slug;
+
+        if (slug !== existingData.slug) {
+            const existingDataBySlug = await queries.subcategory.get({ slug });
+            if (existingDataBySlug)
+                throw new AppError(ERROR_MESSAGES.CONFLICT, "CONFLICT");
+        }
+
+        const [data] = await Promise.all([
+            queries.subcategory.update(id, { ...parsed, slug }),
+            cache.subcategory.remove(id),
+        ]);
+
+        return CResponse({ data });
+    } catch (err) {
+        return handleError(err);
+    }
+}
+
+export async function DELETE(_: NextRequest, { params }: RouteProps) {
+    try {
+        if (env.IS_API_AUTHENTICATED) {
+            const { userId } = await auth();
+            if (!userId)
+                throw new AppError(ERROR_MESSAGES.UNAUTHORIZED, "UNAUTHORIZED");
+
+            const user = await cache.user.get(userId);
+            if (!user || user.role !== "admin")
+                throw new AppError(ERROR_MESSAGES.FORBIDDEN, "FORBIDDEN");
+        }
+
+        const { id } = await params;
+
+        const existingData = await cache.subcategory.get(id);
+        if (!existingData)
+            throw new AppError(ERROR_MESSAGES.NOT_FOUND, "NOT_FOUND");
+
+        const [data] = await Promise.all([
+            queries.subcategory.delete(id),
+            cache.subcategory.remove(id),
+            cache.category.remove(existingData.categoryId),
+        ]);
+
+        return CResponse({ data });
+    } catch (err) {
+        return handleError(err);
+    }
+}
