@@ -77,21 +77,14 @@ class CategoryCache {
     }
 
     async batch(values: CachedCategory[]) {
-        const pipeline = redis.pipeline();
+        const multi = redis.multi();
 
-        await Promise.all(
-            values.map((value) => {
-                const key = this.genKey(value.id);
-                pipeline.set(
-                    key,
-                    JSON.stringify(value),
-                    "EX",
-                    REDIS_RETENTIONS["1w"]
-                );
-            })
-        );
+        for (const value of values) {
+            const key = this.genKey(value.id);
+            multi.set(key, JSON.stringify(value), "EX", REDIS_RETENTIONS["1w"]);
+        }
 
-        return await pipeline.exec();
+        return await multi.exec();
     }
 
     async remove(id: string) {
@@ -172,21 +165,14 @@ class SubcategoryCache {
     }
 
     async batch(values: CachedSubcategory[]) {
-        const pipeline = redis.pipeline();
+        const multi = redis.multi();
 
-        await Promise.all(
-            values.map((value) => {
-                const key = this.genKey(value.id);
-                pipeline.set(
-                    key,
-                    JSON.stringify(value),
-                    "EX",
-                    REDIS_RETENTIONS["1w"]
-                );
-            })
-        );
+        for (const value of values) {
+            const key = this.genKey(value.id);
+            multi.set(key, JSON.stringify(value), "EX", REDIS_RETENTIONS["1w"]);
+        }
 
-        return await pipeline.exec();
+        return await multi.exec();
     }
 
     async remove(id: string) {
@@ -267,21 +253,14 @@ class ProductTypeCache {
     }
 
     async batch(values: CachedProductType[]) {
-        const pipeline = redis.pipeline();
+        const multi = redis.multi();
 
-        await Promise.all(
-            values.map((value) => {
-                const key = this.genKey(value.id);
-                pipeline.set(
-                    key,
-                    JSON.stringify(value),
-                    "EX",
-                    REDIS_RETENTIONS["1w"]
-                );
-            })
-        );
+        for (const value of values) {
+            const key = this.genKey(value.id);
+            multi.set(key, JSON.stringify(value), "EX", REDIS_RETENTIONS["1w"]);
+        }
 
-        return await pipeline.exec();
+        return await multi.exec();
     }
 
     async remove(id: string) {

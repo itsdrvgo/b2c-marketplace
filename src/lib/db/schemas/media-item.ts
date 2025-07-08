@@ -25,7 +25,7 @@ export const mediaItems = pgTable(
 );
 
 export const mediaItemRelations = relations(mediaItems, ({ one }) => ({
-    bucket: one(users, {
+    uploader: one(users, {
         fields: [mediaItems.uploaderId],
         references: [users.id],
     }),
