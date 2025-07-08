@@ -1,7 +1,12 @@
 import { SITE_ROLES } from "@/config/const";
 import { z } from "zod";
 import { addressSchema } from "./address";
-import { dateSchema, emailSchema, idSchema, phoneSchema } from "./general";
+import {
+    emailSchema,
+    generateDateSchema,
+    idSchema,
+    phoneSchema,
+} from "./general";
 
 export const userSchema = z.object({
     id: idSchema,
@@ -34,8 +39,14 @@ export const userSchema = z.object({
         invalid_type_error: "Is verified must be a boolean",
     }),
     role: z.enum(SITE_ROLES),
-    createdAt: dateSchema,
-    updatedAt: dateSchema,
+    createdAt: generateDateSchema({
+        required_error: "Created at is required",
+        invalid_type_error: "Created at must be a date",
+    }),
+    updatedAt: generateDateSchema({
+        required_error: "Updated at is required",
+        invalid_type_error: "Updated at must be a date",
+    }),
 });
 
 export const safeUserSchema = userSchema.omit({

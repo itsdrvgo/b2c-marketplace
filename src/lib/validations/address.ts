@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { dateSchema, idSchema, phoneSchema } from "./general";
+import { generateDateSchema, idSchema, phoneSchema } from "./general";
 
 export const addressSchema = z.object({
     id: idSchema,
@@ -60,8 +60,14 @@ export const addressSchema = z.object({
         required_error: "Is primary is required",
         invalid_type_error: "Is primary must be a boolean",
     }),
-    createdAt: dateSchema,
-    updatedAt: dateSchema,
+    createdAt: generateDateSchema({
+        required_error: "Created at is required",
+        invalid_type_error: "Created at must be a date",
+    }),
+    updatedAt: generateDateSchema({
+        required_error: "Updated at is required",
+        invalid_type_error: "Updated at must be a date",
+    }),
 });
 
 export const createAddressSchema = addressSchema.omit({

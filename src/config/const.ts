@@ -12,6 +12,13 @@ export const ERROR_MESSAGES = {
 
 export const SITE_ROLES = ["user", "mod", "admin"] as const;
 
+export const PRODUCT_VERIFICATION_STATUSES = [
+    "idle",
+    "pending",
+    "approved",
+    "rejected",
+] as const;
+
 export const REDIS_RETENTIONS = {
     "1d": 60 * 60 * 24,
     "3d": 60 * 60 * 24 * 3,

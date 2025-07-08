@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { convertEmptyStringToNull } from "../utils";
+import { generateDateSchema } from "./general";
 
 export const categorySchema = z.object({
     id: z
@@ -30,18 +31,14 @@ export const categorySchema = z.object({
             .min(3, "Description must be at least 3 characters long")
             .nullable()
     ),
-    createdAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Created at is required",
-            invalid_type_error: "Created at must be a date",
-        })
-        .transform((v) => new Date(v)),
-    updatedAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Updated at is required",
-            invalid_type_error: "Updated at must be a date",
-        })
-        .transform((v) => new Date(v)),
+    createdAt: generateDateSchema({
+        required_error: "Created at is required",
+        invalid_type_error: "Created at must be a date",
+    }),
+    updatedAt: generateDateSchema({
+        required_error: "Updated at is required",
+        invalid_type_error: "Updated at must be a date",
+    }),
 });
 
 export const subcategorySchema = z.object({
@@ -79,18 +76,14 @@ export const subcategorySchema = z.object({
             .min(3, "Description must be at least 3 characters long")
             .nullable()
     ),
-    createdAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Created at is required",
-            invalid_type_error: "Created at must be a date",
-        })
-        .transform((v) => new Date(v)),
-    updatedAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Updated at is required",
-            invalid_type_error: "Updated at must be a date",
-        })
-        .transform((v) => new Date(v)),
+    createdAt: generateDateSchema({
+        required_error: "Created at is required",
+        invalid_type_error: "Created at must be a date",
+    }),
+    updatedAt: generateDateSchema({
+        required_error: "Updated at is required",
+        invalid_type_error: "Updated at must be a date",
+    }),
 });
 
 export const productTypeSchema = z.object({
@@ -134,18 +127,14 @@ export const productTypeSchema = z.object({
             .min(3, "Description must be at least 3 characters long")
             .nullable()
     ),
-    createdAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Created at is required",
-            invalid_type_error: "Created at must be a date",
-        })
-        .transform((v) => new Date(v)),
-    updatedAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Updated at is required",
-            invalid_type_error: "Updated at must be a date",
-        })
-        .transform((v) => new Date(v)),
+    createdAt: generateDateSchema({
+        required_error: "Created at is required",
+        invalid_type_error: "Created at must be a date",
+    }),
+    updatedAt: generateDateSchema({
+        required_error: "Updated at is required",
+        invalid_type_error: "Updated at must be a date",
+    }),
 });
 
 export const createCategorySchema = categorySchema.omit({

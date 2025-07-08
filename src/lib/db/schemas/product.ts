@@ -1,3 +1,4 @@
+import { PRODUCT_VERIFICATION_STATUSES } from "@/config/const";
 import { ProductMedia, ProductOptionValue } from "@/lib/validations";
 import { relations, sql } from "drizzle-orm";
 import {
@@ -17,7 +18,7 @@ import { users } from "./user";
 export const products = pgTable(
     "products",
     {
-        // BASIC
+        // BASIC INFO
         id: uuid("id").primaryKey().notNull().unique().defaultRandom(),
         title: text("title").notNull(),
         slug: text("slug").notNull().unique(),
@@ -70,8 +71,16 @@ export const products = pgTable(
         metaKeywords: text("meta_keywords").array().default([]),
 
         // OTHER
+        verificationStatus: text("verification_status", {
+            enum: PRODUCT_VERIFICATION_STATUSES,
+        })
+            .notNull()
+            .default("idle"),
         isDeleted: boolean("is_deleted").default(false).notNull(),
         deletedAt: timestamp("deleted_at"),
+        rejectedAt: timestamp("rejected_at"),
+        rejectionReason: text("rejection_reason"),
+        lastReviewedAt: timestamp("last_reviewed_at"),
         ...timestamps,
     },
     (table) => ({
@@ -152,6 +161,10 @@ export const productVariants = pgTable(
 );
 
 export const productsRelations = relations(products, ({ one, many }) => ({
+    uploader: one(users, {
+        fields: [products.uploaderId],
+        references: [users.id],
+    }),
     options: many(productOptions),
     variants: many(productVariants),
     category: one(categories, {

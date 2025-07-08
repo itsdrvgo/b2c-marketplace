@@ -54,6 +54,19 @@ export const dateSchema = z
     })
     .transform((v) => new Date(v));
 
+export function generateDateSchema(options?: {
+    required_error?: string;
+    invalid_type_error?: string;
+}): z.ZodEffects<z.ZodUnion<[z.ZodString, z.ZodDate]>, Date, string | Date> {
+    return z
+        .union([z.string(), z.date()], {
+            required_error: options?.required_error || "Date is required",
+            invalid_type_error:
+                options?.invalid_type_error || "Date must be a date",
+        })
+        .transform((v) => new Date(v));
+}
+
 export const priceSchema = z
     .union([z.number(), z.string()])
     .transform((v) => Number(v))

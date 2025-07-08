@@ -1,3 +1,4 @@
+import { PRODUCT_VERIFICATION_STATUSES } from "@/config/const";
 import { z } from "zod";
 import { convertEmptyStringToNull } from "../utils";
 import {
@@ -5,17 +6,17 @@ import {
     productTypeSchema,
     subcategorySchema,
 } from "./category";
-import { generateIdSchema } from "./general";
-import { mediaItemSchema } from "./media-item";
-import { safeUserSchema } from "./user";
+import {
+    generateDateSchema,
+    generateIdSchema,
+    idSchema,
+    priceSchema,
+} from "./general";
+import { cachedMediaItemSchema } from "./media-item";
+import { userSchema } from "./user";
 
 export const productOptionValueSchema = z.object({
-    id: z
-        .string({
-            required_error: "ID is required",
-            invalid_type_error: "ID must be a string",
-        })
-        .uuid("ID is invalid"),
+    id: idSchema,
     name: z
         .string({
             required_error: "Name is required",
@@ -32,12 +33,7 @@ export const productOptionValueSchema = z.object({
 });
 
 export const productMediaSchema = z.object({
-    id: z
-        .string({
-            required_error: "ID is required",
-            invalid_type_error: "ID must be a string",
-        })
-        .uuid("ID is invalid"),
+    id: idSchema,
     position: z
         .number({
             required_error: "Position is required",
@@ -47,18 +43,13 @@ export const productMediaSchema = z.object({
         .nonnegative("Position must be a non-negative number"),
 });
 
-export const fullProductMediaSchema = productMediaSchema.extend({
-    mediaItem: mediaItemSchema.nullable(),
+export const enhancedProductMediaSchema = productMediaSchema.extend({
+    mediaItem: cachedMediaItemSchema.nullable(),
 });
 
 export const productSchema = z.object({
     // BASIC INFO
-    id: z
-        .string({
-            required_error: "ID is required",
-            invalid_type_error: "ID must be a string",
-        })
-        .uuid("ID is invalid"),
+    id: idSchema,
     title: z
         .string({
             required_error: "Title is required",
@@ -83,7 +74,7 @@ export const productSchema = z.object({
     uploaderId: generateIdSchema({
         invalid_type_error: "Uploader ID must be a string",
         required_error: "Uploader ID is required",
-    }).nullable(),
+    }),
     isAvailable: z.boolean({
         required_error: "Availability is required",
         invalid_type_error: "Availability must be a boolean",
@@ -96,13 +87,10 @@ export const productSchema = z.object({
         required_error: "Published status is required",
         invalid_type_error: "Published status must be a boolean",
     }),
-    publishedAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Published at is required",
-            invalid_type_error: "Published at must be a date",
-        })
-        .transform((v) => new Date(v))
-        .nullable(),
+    publishedAt: generateDateSchema({
+        required_error: "Published at is required",
+        invalid_type_error: "Published at must be a date",
+    }).nullable(),
     media: productMediaSchema.array().default([]),
     productHasVariants: z.boolean({
         required_error: "Product has variants status is required",
@@ -130,21 +118,9 @@ export const productSchema = z.object({
         .uuid("Product Type ID is invalid"),
 
     // PRICING
-    price: z
-        .union([z.string(), z.number()])
-        .transform((val) => Number(val))
-        .pipe(z.number().nonnegative("Amount must be non-negative"))
-        .nullable(),
-    compareAtPrice: z
-        .union([z.string(), z.number()])
-        .transform((val) => Number(val))
-        .pipe(z.number().nonnegative("Amount must be non-negative"))
-        .nullable(),
-    costPerItem: z
-        .union([z.string(), z.number()])
-        .transform((val) => Number(val))
-        .pipe(z.number().nonnegative("Amount must be non-negative"))
-        .nullable(),
+    price: priceSchema.nullable(),
+    compareAtPrice: priceSchema.nullable(),
+    costPerItem: priceSchema.nullable(),
 
     // INVENTORY
     nativeSku: z.preprocess(
@@ -255,39 +231,51 @@ export const productSchema = z.object({
             .max(160, "Meta description must be at most 160 characters long")
             .nullable()
     ),
-    metaKeywords: z.array(
-        z
-            .string({
-                required_error: "Meta keyword is required",
-                invalid_type_error: "Meta keyword must be a string",
-            })
-            .min(1, "Meta keyword must be at least 1 characters long")
-    ),
+    metaKeywords: z
+        .array(
+            z
+                .string({
+                    required_error: "Meta keyword is required",
+                    invalid_type_error: "Meta keyword must be a string",
+                })
+                .min(1, "Meta keyword must be at least 1 characters long")
+        )
+        .default([]),
 
     // OTHER
+    verificationStatus: z.enum(PRODUCT_VERIFICATION_STATUSES),
     isDeleted: z.boolean({
         required_error: "Deleted status is required",
         invalid_type_error: "Deleted status must be a boolean",
     }),
-    deletedAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Deleted at is required",
-            invalid_type_error: "Deleted at must be a date",
-        })
-        .transform((v) => new Date(v))
-        .nullable(),
-    createdAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Created at is required",
-            invalid_type_error: "Created at must be a date",
-        })
-        .transform((v) => new Date(v)),
-    updatedAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Updated at is required",
-            invalid_type_error: "Updated at must be a date",
-        })
-        .transform((v) => new Date(v)),
+    deletedAt: generateDateSchema({
+        required_error: "Deleted at is required",
+        invalid_type_error: "Deleted at must be a date",
+    }).nullable(),
+    rejectedAt: generateDateSchema({
+        required_error: "Rejected at is required",
+        invalid_type_error: "Rejected at must be a date",
+    }).nullable(),
+    rejectionReason: z.preprocess(
+        convertEmptyStringToNull,
+        z
+            .string({
+                invalid_type_error: "Rejection reason must be a string",
+            })
+            .nullable()
+    ),
+    lastReviewedAt: generateDateSchema({
+        required_error: "Last reviewed at is required",
+        invalid_type_error: "Last reviewed at must be a date",
+    }).nullable(),
+    createdAt: generateDateSchema({
+        required_error: "Created at is required",
+        invalid_type_error: "Created at must be a date",
+    }),
+    updatedAt: generateDateSchema({
+        required_error: "Updated at is required",
+        invalid_type_error: "Updated at must be a date",
+    }),
 });
 
 export const productOptionSchema = z.object({
@@ -321,41 +309,27 @@ export const productOptionSchema = z.object({
         required_error: "Deleted status is required",
         invalid_type_error: "Deleted status must be a boolean",
     }),
-    deletedAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Deleted at is required",
-            invalid_type_error: "Deleted at must be a date",
-        })
-        .transform((v) => new Date(v))
-        .nullable(),
-    createdAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Created at is required",
-            invalid_type_error: "Created at must be a date",
-        })
-        .transform((v) => new Date(v)),
-    updatedAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Updated at is required",
-            invalid_type_error: "Updated at must be a date",
-        })
-        .transform((v) => new Date(v)),
+    deletedAt: generateDateSchema({
+        required_error: "Deleted at is required",
+        invalid_type_error: "Deleted at must be a date",
+    }).nullable(),
+    createdAt: generateDateSchema({
+        required_error: "Created at is required",
+        invalid_type_error: "Created at must be a date",
+    }),
+    updatedAt: generateDateSchema({
+        required_error: "Updated at is required",
+        invalid_type_error: "Updated at must be a date",
+    }),
 });
 
 export const productVariantSchema = z.object({
     // BASIC INFO
-    id: z
-        .string({
-            required_error: "ID is required",
-            invalid_type_error: "ID must be a string",
-        })
-        .uuid("ID is invalid"),
-    productId: z
-        .string({
-            required_error: "Product ID is required",
-            invalid_type_error: "Product ID must be a string",
-        })
-        .uuid("Product ID is invalid"),
+    id: idSchema,
+    productId: generateIdSchema({
+        invalid_type_error: "Product ID must be a string",
+        required_error: "Product ID is required",
+    }),
     image: z.preprocess(
         convertEmptyStringToNull,
         z
@@ -368,20 +342,9 @@ export const productVariantSchema = z.object({
     combinations: z.record(z.string(), z.string()),
 
     // PRICING
-    price: z
-        .union([z.string(), z.number()])
-        .transform((val) => Number(val))
-        .pipe(z.number().nonnegative("Amount must be non-negative")),
-    compareAtPrice: z
-        .union([z.string(), z.number()])
-        .transform((val) => Number(val))
-        .pipe(z.number().nonnegative("Amount must be non-negative"))
-        .nullable(),
-    costPerItem: z
-        .union([z.string(), z.number()])
-        .transform((val) => Number(val))
-        .pipe(z.number().nonnegative("Amount must be non-negative"))
-        .nullable(),
+    price: priceSchema,
+    compareAtPrice: priceSchema.nullable(),
+    costPerItem: priceSchema.nullable(),
 
     // INVENTORY
     nativeSku: z
@@ -465,29 +428,22 @@ export const productVariantSchema = z.object({
         required_error: "Deleted status is required",
         invalid_type_error: "Deleted status must be a boolean",
     }),
-    deletedAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Deleted at is required",
-            invalid_type_error: "Deleted at must be a date",
-        })
-        .transform((v) => new Date(v))
-        .nullable(),
-    createdAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Created at is required",
-            invalid_type_error: "Created at must be a date",
-        })
-        .transform((v) => new Date(v)),
-    updatedAt: z
-        .union([z.string(), z.date()], {
-            required_error: "Updated at is required",
-            invalid_type_error: "Updated at must be a date",
-        })
-        .transform((v) => new Date(v)),
+    deletedAt: generateDateSchema({
+        required_error: "Deleted at is required",
+        invalid_type_error: "Deleted at must be a date",
+    }).nullable(),
+    createdAt: generateDateSchema({
+        required_error: "Created at is required",
+        invalid_type_error: "Created at must be a date",
+    }),
+    updatedAt: generateDateSchema({
+        required_error: "Updated at is required",
+        invalid_type_error: "Updated at must be a date",
+    }),
 });
 
-export const fullProductVariantSchema = productVariantSchema.extend({
-    mediaItem: mediaItemSchema.nullable(),
+export const enhancedProductVariantSchema = productVariantSchema.extend({
+    mediaItem: cachedMediaItemSchema.nullable(),
 });
 
 export const productVariantGroupSchema = z.object({
@@ -516,16 +472,16 @@ export const productVariantGroupSchema = z.object({
 });
 
 export const fullProductSchema = productSchema.extend({
-    uploader: safeUserSchema,
+    uploader: z.lazy(() => userSchema),
     options: z.array(productOptionSchema),
-    variants: z.array(fullProductVariantSchema),
-    media: z.array(fullProductMediaSchema),
+    variants: z.array(enhancedProductVariantSchema),
+    media: z.array(enhancedProductMediaSchema),
     category: categorySchema,
     subcategory: subcategorySchema,
     productType: productTypeSchema,
 });
 
-export const createProductSchema = productSchema
+const createProductSchemaRaw = productSchema
     .omit({
         id: true,
         slug: true,
@@ -534,15 +490,21 @@ export const createProductSchema = productSchema
         isActive: true,
         isDeleted: true,
         isPublished: true,
+        lastReviewedAt: true,
         publishedAt: true,
+        rejectedAt: true,
+        rejectionReason: true,
+        verificationStatus: true,
         createdAt: true,
         updatedAt: true,
     })
     .extend({
         options: z.array(productOptionSchema),
         variants: z.array(productVariantSchema),
-    })
-    .superRefine((data, ctx) => {
+    });
+
+export const createProductSchema = createProductSchemaRaw.superRefine(
+    (data, ctx) => {
         if (!data.productHasVariants) {
             if (
                 data.price === null ||
@@ -637,9 +599,15 @@ export const createProductSchema = productSchema
         }
 
         return true;
-    });
+    }
+);
 
-export const updateProductSchema = createProductSchema;
+export const updateProductSchema = createProductSchemaRaw.partial();
+
+export const rejectProductSchema = productSchema.pick({
+    id: true,
+    rejectionReason: true,
+});
 
 export type Product = z.infer<typeof productSchema>;
 export type ProductOptionValue = z.infer<typeof productOptionValueSchema>;
@@ -647,5 +615,7 @@ export type ProductMedia = z.infer<typeof productMediaSchema>;
 export type ProductOption = z.infer<typeof productOptionSchema>;
 export type ProductVariant = z.infer<typeof productVariantSchema>;
 export type ProductVariantGroup = z.infer<typeof productVariantGroupSchema>;
+export type FullProduct = z.infer<typeof fullProductSchema>;
 export type CreateProduct = z.infer<typeof createProductSchema>;
 export type UpdateProduct = z.infer<typeof updateProductSchema>;
+export type RejectProduct = z.infer<typeof rejectProductSchema>;

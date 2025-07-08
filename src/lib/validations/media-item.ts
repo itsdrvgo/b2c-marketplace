@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { convertEmptyStringToNull } from "../utils";
-import { dateSchema, generateIdSchema, idSchema } from "./general";
+import { generateDateSchema, generateIdSchema, idSchema } from "./general";
 
 export const mediaItemSchema = z.object({
     id: idSchema,
@@ -42,8 +42,14 @@ export const mediaItemSchema = z.object({
         })
         .int("Media size must be an integer")
         .min(0, "Media size must be greater than or equal to 0"),
-    createdAt: dateSchema,
-    updatedAt: dateSchema,
+    createdAt: generateDateSchema({
+        required_error: "Created at is required",
+        invalid_type_error: "Created at must be a date",
+    }),
+    updatedAt: generateDateSchema({
+        required_error: "Updated at is required",
+        invalid_type_error: "Updated at must be a date",
+    }),
 });
 
 export const createMediaItemSchema = mediaItemSchema.omit({
