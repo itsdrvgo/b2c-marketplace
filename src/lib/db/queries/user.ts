@@ -14,9 +14,8 @@ class UserQuery {
         search?: string;
     }) {
         const data = await db.query.users.findMany({
-            where: !!search?.length
-                ? ilike(users.email, `%${search}%`)
-                : undefined,
+            where: (f, o) =>
+                !!search?.length ? o.ilike(f.email, `%${search}%`) : undefined,
             with: { addresses: true },
             limit,
             offset: (page - 1) * limit,
@@ -47,7 +46,7 @@ class UserQuery {
 
     async get(id: string) {
         const user = await db.query.users.findFirst({
-            where: eq(users.id, id),
+            where: (f, o) => o.eq(f.id, id),
             with: { addresses: true },
         });
         if (!user) return null;

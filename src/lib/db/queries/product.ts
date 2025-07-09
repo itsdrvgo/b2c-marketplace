@@ -4,10 +4,16 @@ import {
 } from "@/config/const";
 import { cache } from "@/lib/redis/methods";
 import { convertDollarToCent } from "@/lib/utils";
-import { FullProduct, fullProductSchema, Product } from "@/lib/validations";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import {
+    CreateProduct,
+    FullProduct,
+    fullProductSchema,
+    Product,
+    UpdateProduct,
+} from "@/lib/validations";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "..";
-import { products, productVariants } from "../schemas";
+import { productOptions, products, productVariants } from "../schemas";
 
 class ProductQuery {
     async count({
@@ -214,6 +220,389 @@ class ProductQuery {
             items,
             pages,
         };
+    }
+
+    async get({
+        id,
+        isActive,
+        isAvailable,
+        isPublished,
+        isDeleted,
+        verificationStatus,
+        sku,
+        slug,
+    }: {
+        id?: string;
+        sku?: string;
+        slug?: string;
+        isDeleted?: boolean;
+        isAvailable?: boolean;
+        isPublished?: boolean;
+        isActive?: boolean;
+        verificationStatus?: Product["verificationStatus"];
+    }) {
+        if (!id && !sku && !slug)
+            throw new Error("Must provide id, sku or slug");
+
+        const data = await db.query.products.findFirst({
+            with: {
+                uploader: true,
+                variants: true,
+                category: true,
+                subcategory: true,
+                productType: true,
+                options: true,
+            },
+            where: (f, o) =>
+                o.and(
+                    o.or(
+                        id ? o.eq(products.id, id) : undefined,
+                        sku ? o.eq(products.sku, sku) : undefined,
+                        slug ? o.eq(products.slug, slug) : undefined
+                    ),
+                    isDeleted !== undefined
+                        ? o.eq(products.isDeleted, isDeleted)
+                        : undefined,
+                    isAvailable !== undefined
+                        ? o.eq(products.isAvailable, isAvailable)
+                        : undefined,
+                    isPublished !== undefined
+                        ? o.eq(products.isPublished, isPublished)
+                        : undefined,
+                    isActive !== undefined
+                        ? o.eq(products.isActive, isActive)
+                        : undefined,
+                    verificationStatus !== undefined
+                        ? o.eq(products.verificationStatus, verificationStatus)
+                        : undefined
+                ),
+        });
+        if (!data) return null;
+
+        const mediaIds = new Set<string>();
+        data.media.forEach((media) => mediaIds.add(media.id));
+        data.variants.forEach((variant) => {
+            if (variant.image) mediaIds.add(variant.image);
+        });
+
+        const mediaItems = await cache.mediaItem.scan(Array.from(mediaIds));
+        const mediaMap = new Map(mediaItems.map((item) => [item.id, item]));
+
+        const enhanced = {
+            ...data,
+            media: data.media.map((media) => ({
+                ...media,
+                mediaItem: mediaMap.get(media.id),
+            })),
+            variants: data.variants.map((variant) => ({
+                ...variant,
+                mediaItem: variant.image ? mediaMap.get(variant.image) : null,
+            })),
+        };
+
+        return enhanced;
+    }
+
+    async create(values: CreateProduct & { slug: string }) {
+        const data = await db.transaction(async (tx) => {
+            const newProduct = await tx
+                .insert(products)
+                .values(values)
+                .returning()
+                .then((res) => res[0]);
+
+            const [newOptions, newVariants] = await Promise.all([
+                !!values.options?.length
+                    ? tx
+                          .insert(productOptions)
+                          .values(
+                              values.options.map((option) => ({
+                                  ...option,
+                                  productId: newProduct.id,
+                              }))
+                          )
+                          .returning()
+                    : [],
+                !!values.variants?.length
+                    ? tx
+                          .insert(productVariants)
+                          .values(
+                              values.variants.map((variant) => ({
+                                  ...variant,
+                                  productId: newProduct.id,
+                              }))
+                          )
+                          .returning()
+                    : [],
+            ]);
+
+            return {
+                ...newProduct,
+                options: newOptions,
+                variants: newVariants,
+            };
+        });
+
+        return data;
+    }
+
+    async batch(values: (CreateProduct & { slug: string })[]) {
+        const data = await db.transaction(async (tx) => {
+            const newProducts = await tx
+                .insert(products)
+                .values(values)
+                .returning()
+                .then((res) => res);
+
+            const optionsToInsert = values.flatMap((value, index) =>
+                value.options.map((option) => ({
+                    ...option,
+                    productId: newProducts[index].id,
+                }))
+            );
+            const variantsToInsert = values.flatMap((value, index) =>
+                value.variants.map((variant) => ({
+                    ...variant,
+                    productId: newProducts[index].id,
+                }))
+            );
+
+            const [newOptions, newVariants] = await Promise.all([
+                !!optionsToInsert.length
+                    ? tx
+                          .insert(productOptions)
+                          .values(optionsToInsert)
+                          .returning()
+                    : [],
+                !!variantsToInsert.length
+                    ? tx
+                          .insert(productVariants)
+                          .values(variantsToInsert)
+                          .returning()
+                    : [],
+            ]);
+
+            return newProducts.map((product) => ({
+                ...product,
+                options: newOptions.filter((o) => o.productId === product.id),
+                variants: newVariants.filter((v) => v.productId === product.id),
+            }));
+        });
+
+        return data;
+    }
+
+    async update(id: string, values: UpdateProduct) {
+        const data = await db.transaction(async (tx) => {
+            const updatedProduct = await tx
+                .update(products)
+                .set({
+                    ...values,
+                    updatedAt: new Date(),
+                })
+                .where(eq(products.id, id))
+                .returning()
+                .then((res) => res[0]);
+
+            const [existingOptions, existingVariants] = await Promise.all([
+                tx.query.productOptions.findMany({
+                    where: eq(productOptions.productId, id),
+                }),
+                tx.query.productVariants.findMany({
+                    where: eq(productVariants.productId, id),
+                }),
+            ]);
+
+            const optionsToBeAdded =
+                values.options?.filter(
+                    (option) => !existingOptions.find((o) => o.id === option.id)
+                ) || [];
+            const optionsToBeUpdated =
+                values.options?.filter((option) => {
+                    const existing = existingOptions.find(
+                        (o) => o.id === option.id
+                    );
+                    return (
+                        existing &&
+                        JSON.stringify(option) !== JSON.stringify(existing)
+                    );
+                }) || [];
+            const optionsToBeDeleted =
+                existingOptions.filter(
+                    (option) => !values.options?.find((o) => o.id === option.id)
+                ) || [];
+
+            const variantsToBeAdded =
+                values.variants?.filter(
+                    (variant) =>
+                        !existingVariants.find((v) => v.id === variant.id)
+                ) || [];
+            const variantsToBeUpdated =
+                values.variants?.filter((variant) => {
+                    const existing = existingVariants.find(
+                        (v) => v.id === variant.id
+                    );
+                    return (
+                        existing &&
+                        JSON.stringify(variant) !== JSON.stringify(existing)
+                    );
+                }) || [];
+            const variantsToBeDeleted =
+                existingVariants.filter(
+                    (variant) =>
+                        !values.variants?.find((v) => v.id === variant.id)
+                ) || [];
+
+            await Promise.all([
+                optionsToBeAdded.length &&
+                    tx.insert(productOptions).values(optionsToBeAdded),
+                variantsToBeAdded.length &&
+                    tx
+                        .insert(productVariants)
+                        .values(variantsToBeAdded)
+                        .returning(),
+                ...optionsToBeUpdated.map((option) =>
+                    tx
+                        .update(productOptions)
+                        .set(option)
+                        .where(
+                            and(
+                                eq(productOptions.productId, id),
+                                eq(productOptions.id, option.id)
+                            )
+                        )
+                ),
+                ...variantsToBeUpdated.map((variant) =>
+                    tx
+                        .update(productVariants)
+                        .set(variant)
+                        .where(
+                            and(
+                                eq(productVariants.productId, id),
+                                eq(productVariants.id, variant.id)
+                            )
+                        )
+                ),
+            ]);
+
+            await Promise.all([
+                tx
+                    .update(productOptions)
+                    .set({
+                        isDeleted: true,
+                        deletedAt: new Date(),
+                        updatedAt: new Date(),
+                    })
+                    .where(
+                        and(
+                            eq(productOptions.productId, id),
+                            inArray(
+                                productOptions.id,
+                                optionsToBeDeleted.map((o) => o.id)
+                            )
+                        )
+                    ),
+                tx
+                    .update(productVariants)
+                    .set({
+                        isDeleted: true,
+                        deletedAt: new Date(),
+                        updatedAt: new Date(),
+                    })
+                    .where(
+                        and(
+                            eq(productVariants.productId, id),
+                            inArray(
+                                productVariants.id,
+                                variantsToBeDeleted.map((v) => v.id)
+                            )
+                        )
+                    ),
+            ]);
+
+            const [updatedOptions, updatedVariants] = await Promise.all([
+                tx.query.productOptions.findMany({
+                    where: eq(productOptions.productId, id),
+                }),
+                tx.query.productVariants.findMany({
+                    where: eq(productVariants.productId, id),
+                }),
+            ]);
+
+            return {
+                ...updatedProduct,
+                options: updatedOptions,
+                variants: updatedVariants,
+            };
+        });
+
+        return data;
+    }
+
+    async stock(
+        values: {
+            productId: string;
+            variantId?: string;
+            stock: number;
+        }[]
+    ) {
+        const data = await db.transaction(async (tx) => {
+            const updated = await Promise.all(
+                values.map(async (item) => {
+                    if (item.variantId) {
+                        const res = await tx
+                            .update(productVariants)
+                            .set({
+                                quantity: item.stock,
+                                updatedAt: new Date(),
+                            })
+                            .where(
+                                and(
+                                    eq(
+                                        productVariants.productId,
+                                        item.productId
+                                    ),
+                                    eq(productVariants.id, item.variantId)
+                                )
+                            )
+                            .returning();
+                        return res[0];
+                    }
+
+                    const res = await tx
+                        .update(products)
+                        .set({
+                            quantity: item.stock,
+                            updatedAt: new Date(),
+                        })
+                        .where(eq(products.id, item.productId))
+                        .returning();
+                    return res[0];
+                })
+            );
+
+            return updated;
+        });
+
+        return data;
+    }
+
+    async delete(id: string) {
+        const data = await db
+            .update(products)
+            .set({
+                isDeleted: true,
+                isActive: false,
+                isPublished: false,
+                isAvailable: false,
+                deletedAt: new Date(),
+                updatedAt: new Date(),
+            })
+            .where(eq(products.id, id))
+            .returning()
+            .then((res) => res[0]);
+
+        return data;
     }
 }
 
