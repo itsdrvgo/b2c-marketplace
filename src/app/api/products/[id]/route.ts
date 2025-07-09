@@ -169,7 +169,7 @@ export async function DELETE(req: NextRequest, { params }: RouteProps) {
         if (!existingData)
             throw new AppError(ERROR_MESSAGES.NOT_FOUND, "NOT_FOUND");
 
-        await queries.product.delete(id);
+        await Promise.all([queries.product.delete(id), cache.wishlist.drop()]);
         return CResponse();
     } catch (err) {
         return handleError(err);

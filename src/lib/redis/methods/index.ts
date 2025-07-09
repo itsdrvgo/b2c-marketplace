@@ -1,6 +1,7 @@
 import { categoryCache, productTypeCache, subcategoryCache } from "./category";
 import { mediaItemCache } from "./media-item";
 import { userCache } from "./user";
+import { wishlistCache } from "./wishlist";
 
 export const cache = {
     category: categoryCache,
@@ -8,4 +9,5 @@ export const cache = {
     subcategory: subcategoryCache,
     mediaItem: mediaItemCache,
     user: userCache,
+    wishlist: wishlistCache,
 };

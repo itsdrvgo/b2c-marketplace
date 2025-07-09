@@ -6,6 +6,7 @@ import {
 import { mediaItemQueries } from "./media-item";
 import { productQueries } from "./product";
 import { userQueries } from "./user";
+import { wishlistQueries } from "./wishlist";
 
 export const queries = {
     category: categoryQueries,
@@ -14,4 +15,5 @@ export const queries = {
     mediaItem: mediaItemQueries,
     product: productQueries,
     user: userQueries,
+    wishlist: wishlistQueries,
 };
