@@ -303,49 +303,6 @@ class ProductQuery {
         return enhanced;
     }
 
-    async create(values: CreateProduct & { slug: string }) {
-        const data = await db.transaction(async (tx) => {
-            const newProduct = await tx
-                .insert(products)
-                .values(values)
-                .returning()
-                .then((res) => res[0]);
-
-            const [newOptions, newVariants] = await Promise.all([
-                !!values.options?.length
-                    ? tx
-                          .insert(productOptions)
-                          .values(
-                              values.options.map((option) => ({
-                                  ...option,
-                                  productId: newProduct.id,
-                              }))
-                          )
-                          .returning()
-                    : [],
-                !!values.variants?.length
-                    ? tx
-                          .insert(productVariants)
-                          .values(
-                              values.variants.map((variant) => ({
-                                  ...variant,
-                                  productId: newProduct.id,
-                              }))
-                          )
-                          .returning()
-                    : [],
-            ]);
-
-            return {
-                ...newProduct,
-                options: newOptions,
-                variants: newVariants,
-            };
-        });
-
-        return data;
-    }
-
     async batch(values: (CreateProduct & { slug: string })[]) {
         const data = await db.transaction(async (tx) => {
             const newProducts = await tx

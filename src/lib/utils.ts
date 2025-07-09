@@ -182,9 +182,9 @@ export function convertEmptyStringToNull(data: unknown) {
     return typeof data === "string" && data === "" ? null : data;
 }
 
-export function generateProductSlug(productName: string, brandName: string) {
+export function generateProductSlug(productName: string) {
     return slugify(
-        `${brandName} ${productName} ${Date.now()} ${Math.random().toString(36).substring(7)}`
+        `${productName} ${Date.now()} ${Math.random().toString(36).substring(7)}`
     );
 }
 
@@ -246,10 +246,6 @@ export function generateSKU(
     opts: {
         prefix?: string;
         separator?: string;
-        brand?: {
-            id: string;
-            name: string;
-        };
         category?: string;
         subcategory?: string;
         productType?: string;
@@ -263,11 +259,6 @@ export function generateSKU(
     if (!opts.separator) opts.separator = "-";
 
     const sku = [opts.prefix];
-
-    if (opts.brand) {
-        const brandCode = opts.brand.name.slice(0, 3) + opts.brand.id.slice(-4);
-        sku.push(brandCode);
-    }
 
     if (opts.category) sku.push(opts.category.slice(0, 3));
     if (opts.subcategory) sku.push(opts.subcategory.slice(0, 3));

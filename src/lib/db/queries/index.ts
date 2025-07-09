@@ -4,6 +4,7 @@ import {
     subcategoryQueries,
 } from "./category";
 import { mediaItemQueries } from "./media-item";
+import { productQueries } from "./product";
 import { userQueries } from "./user";
 
 export const queries = {
@@ -11,5 +12,6 @@ export const queries = {
     productType: productTypeQueries,
     subcategory: subcategoryQueries,
     mediaItem: mediaItemQueries,
+    product: productQueries,
     user: userQueries,
 };
