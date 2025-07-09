@@ -1,5 +1,5 @@
 import { fullUserSchema } from "@/lib/validations/user";
-import { desc, eq, ilike } from "drizzle-orm";
+import { desc, ilike } from "drizzle-orm";
 import { db } from "..";
 import { users } from "../schemas";
 
