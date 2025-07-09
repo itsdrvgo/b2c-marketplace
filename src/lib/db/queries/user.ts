@@ -1,5 +1,5 @@
 import { fullUserSchema } from "@/lib/validations/user";
-import { desc, ilike } from "drizzle-orm";
+import { ilike } from "drizzle-orm";
 import { db } from "..";
 import { users } from "../schemas";
 
@@ -19,7 +19,7 @@ class UserQuery {
             with: { addresses: true },
             limit,
             offset: (page - 1) * limit,
-            orderBy: [desc(users.createdAt)],
+            orderBy: (f, o) => o.desc(f.createdAt),
             extras: {
                 count: db
                     .$count(
