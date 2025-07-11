@@ -1,15 +1,15 @@
 import { SITE_ROLES } from "@/config/const";
 import { z } from "zod";
 import { addressSchema } from "./address";
-import {
-    emailSchema,
-    generateDateSchema,
-    idSchema,
-    phoneSchema,
-} from "./general";
+import { emailSchema, generateDateSchema, phoneSchema } from "./general";
 
 export const userSchema = z.object({
-    id: idSchema,
+    id: z
+        .string({
+            required_error: "ID is required",
+            invalid_type_error: "ID must be a string",
+        })
+        .min(1, "ID is required"),
     firstName: z
         .string({
             required_error: "First name is required",

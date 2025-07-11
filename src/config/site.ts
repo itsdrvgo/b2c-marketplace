@@ -36,14 +36,9 @@ export const siteConfig: SiteConfig = {
     contact: "contact@freveo.com",
     menu: [
         {
-            name: "Features",
-            href: "/#features",
-            icon: "User",
-        },
-        {
-            name: "Pricing",
-            href: "/pricing",
-            icon: "DollarSign",
+            name: "Shop",
+            href: "/shop",
+            icon: "Store",
         },
         {
             name: "Support",

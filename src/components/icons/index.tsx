@@ -1,4 +1,5 @@
 import {
+    ChevronRight,
     DollarSign,
     Eye,
     EyeOff,
@@ -7,8 +8,12 @@ import {
     Instagram,
     LifeBuoy,
     Linkedin,
+    LogOut,
+    Menu,
+    Store,
     Twitter,
     User,
+    User2,
     Youtube,
     type LucideIcon,
     type LucideProps,
@@ -17,6 +22,11 @@ import {
 export type Icon = LucideIcon;
 
 export const Icons = {
+    Store,
+    ChevronRight,
+    User2,
+    LogOut,
+    Menu,
     EyeOff,
     Eye,
     User,

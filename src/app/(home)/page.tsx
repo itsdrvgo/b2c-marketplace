@@ -1,3 +1,5 @@
+import { GeneralShell } from "@/components/globals/layouts";
+
 export default function Page() {
-    return <>Hello</>;
+    return <GeneralShell>Hello</GeneralShell>;
 }

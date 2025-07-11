@@ -37,6 +37,7 @@
         "input-otp": "^1.4.2",
         "ioredis": "^5.6.1",
         "lucide-react": "^0.525.0",
+        "motion": "^12.23.3",
         "next": "15.3.3",
         "next-themes": "^0.4.6",
         "nuqs": "^2.4.3",
@@ -49,7 +50,8 @@
         "svix": "^1.69.0",
         "uploadthing": "^7.7.3",
         "vaul": "^1.1.2",
-        "zod": "^3.25.76"
+        "zod": "^3.25.76",
+        "zustand": "^5.0.6"
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3.3.1",

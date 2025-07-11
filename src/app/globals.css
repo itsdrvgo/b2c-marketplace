@@ -117,7 +117,7 @@ button {
     --muted-foreground: oklch(0.556 0 0);
 
     --accent: oklch(58.707% 0.11703 250.491);
-    --accent-foreground: oklch(0.208 0.042 265.755);
+    --accent-foreground: oklch(100% 0.00011 271.152);
 
     --destructive: oklch(0.577 0.245 27.325);
     --destructive-foreground: oklch(0.577 0.245 27.325);
