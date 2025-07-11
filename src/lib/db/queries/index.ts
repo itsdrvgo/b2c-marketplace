@@ -1,3 +1,4 @@
+import { cartQueries } from "./cart";
 import {
     categoryQueries,
     productTypeQueries,
@@ -9,6 +10,7 @@ import { userQueries } from "./user";
 import { wishlistQueries } from "./wishlist";
 
 export const queries = {
+    cart: cartQueries,
     category: categoryQueries,
     productType: productTypeQueries,
     subcategory: subcategoryQueries,

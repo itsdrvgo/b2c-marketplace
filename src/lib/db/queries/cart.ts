@@ -1,17 +1,17 @@
 import { cache } from "@/lib/redis/methods";
-import { cachedWishlistSchema, CreateWishlist } from "@/lib/validations";
-import { eq } from "drizzle-orm";
+import { cachedCartSchema, CreateCart, UpdateCart } from "@/lib/validations";
+import { and, eq, inArray } from "drizzle-orm";
 import { db } from "..";
-import { wishlists } from "../schemas";
+import { carts } from "../schemas";
 
-class WishlistQuery {
+class CartQuery {
     async count(userId: string) {
-        const data = await db.$count(wishlists, eq(wishlists.userId, userId));
+        const data = await db.$count(carts, eq(carts.userId, userId));
         return +data || 0;
     }
 
     async scan(userId: string) {
-        const data = await db.query.wishlists.findMany({
+        const data = await db.query.carts.findMany({
             with: {
                 product: {
                     with: {
@@ -22,10 +22,10 @@ class WishlistQuery {
                         options: true,
                     },
                 },
+                variant: true,
             },
-            where: eq(wishlists.userId, userId),
+            where: eq(carts.userId, userId),
         });
-
         if (!data.length) return [];
 
         const mediaIds = new Set<string>();
@@ -56,16 +56,23 @@ class WishlistQuery {
             },
         }));
 
-        const parsed = cachedWishlistSchema.array().parse(enhanced);
+        const parsed = cachedCartSchema.array().parse(enhanced);
         return parsed;
     }
 
-    async get({ userId, productId }: { userId: string; productId: string }) {
-        const data = await db.query.wishlists.findFirst({
+    async get({
+        userId,
+        productId,
+        variantId,
+    }: {
+        userId: string;
+        productId: string;
+        variantId?: string;
+    }) {
+        const data = await db.query.carts.findFirst({
             with: {
                 product: {
                     with: {
-                        uploader: true,
                         variants: true,
                         category: true,
                         subcategory: true,
@@ -73,11 +80,13 @@ class WishlistQuery {
                         options: true,
                     },
                 },
+                variant: true,
             },
             where: (f, o) =>
                 o.and(
-                    o.eq(f.userId, userId),
-                    productId ? o.eq(f.productId, productId) : undefined
+                    o.eq(carts.userId, userId),
+                    o.eq(carts.productId, productId),
+                    variantId ? o.eq(carts.variantId, variantId) : undefined
                 ),
         });
 
@@ -110,13 +119,13 @@ class WishlistQuery {
             },
         };
 
-        const parsed = cachedWishlistSchema.parse(enhanced);
+        const parsed = cachedCartSchema.parse(enhanced);
         return parsed;
     }
 
-    async create(values: CreateWishlist) {
+    async create(values: CreateCart) {
         const data = await db
-            .insert(wishlists)
+            .insert(carts)
             .values(values)
             .returning()
             .then((res) => res[0]);
@@ -124,20 +133,54 @@ class WishlistQuery {
         return data;
     }
 
-    async delete(id: string) {
+    async update(
+        values:
+            | { id: string; values: UpdateCart }
+            | { ids: string[]; status: boolean }
+    ) {
+        if ("id" in values) {
+            const data = await db
+                .update(carts)
+                .set({
+                    ...values.values,
+                    updatedAt: new Date(),
+                })
+                .where(eq(carts.id, values.id))
+                .returning()
+                .then((res) => res[0]);
+
+            return data;
+        } else {
+            const data = await db
+                .update(carts)
+                .set({ status: values.status, updatedAt: new Date() })
+                .where(inArray(carts.id, values.ids))
+                .returning()
+                .then((res) => res[0]);
+
+            return data;
+        }
+    }
+
+    async delete({ userId, ids }: { userId: string; ids: string[] }) {
         const data = await db
-            .delete(wishlists)
-            .where(eq(wishlists.id, id))
+            .delete(carts)
+            .where(and(eq(carts.userId, userId), inArray(carts.id, ids)))
             .returning()
             .then((res) => res[0]);
 
         return data;
     }
 
-    async drop(userId: string) {
+    async drop({ userId, status }: { userId: string; status?: boolean }) {
         const data = await db
-            .delete(wishlists)
-            .where(eq(wishlists.userId, userId))
+            .delete(carts)
+            .where(
+                and(
+                    eq(carts.userId, userId),
+                    status ? eq(carts.status, status) : undefined
+                )
+            )
             .returning()
             .then((res) => res[0]);
 
@@ -145,4 +188,4 @@ class WishlistQuery {
     }
 }
 
-export const wishlistQueries = new WishlistQuery();
+export const cartQueries = new CartQuery();

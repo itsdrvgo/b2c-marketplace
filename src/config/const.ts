@@ -11,6 +11,8 @@ export const ERROR_MESSAGES = {
         "The request could not be understood or was missing required parameters",
     NOT_FOUND: "The requested resource was not found",
     USER_NOT_FOUND: "User not found",
+    PRODUCT_ALREADY_IN_WISHLIST: "Product already in wishlist",
+    PRODUCT_NOT_FOUND: "Product not found",
 } as const;
 
 export const SITE_ROLES = ["user", "mod", "admin"] as const;
