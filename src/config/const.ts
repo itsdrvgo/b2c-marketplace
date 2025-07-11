@@ -1,6 +1,9 @@
 export const DEFAULT_PRODUCT_PAGINATION_LIMIT = 20;
 export const DEFAULT_PRODUCT_PAGINATION_PAGE = 1;
 
+export const DEFAULT_PAGINATION_LIMIT = 10;
+export const DEFAULT_PAGINATION_PAGE = 1;
+
 export const ERROR_MESSAGES = {
     GENERIC: "An unexpected error occurred. Please try again later",
     UNAUTHORIZED: "You are not authorized to perform this action",
