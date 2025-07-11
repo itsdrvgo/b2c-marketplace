@@ -11,6 +11,8 @@ A comprehensive e-commerce marketplace API built with Next.js, featuring user au
     - [Subcategories](#subcategories)
     - [Product Types](#product-types)
     - [Products](#products)
+    - [Users](#users)
+    - [User Addresses](#user-addresses)
     - [Shopping Cart](#shopping-cart)
     - [Wishlist](#wishlist)
     - [Webhooks](#webhooks)
@@ -386,6 +388,148 @@ PATCH /api/products/[id]
 ```
 DELETE /api/products/[id]
 ```
+
+### Users
+
+Manage users and user data.
+
+#### Get All Users (Admin Only)
+
+```
+GET /api/users
+```
+
+**Query Parameters:**
+
+- `limit` (number): Number of users per page (default: 10)
+- `page` (number): Page number (default: 1)
+- `search` (string): Search query for user name/email
+
+**Response:**
+
+```json
+{
+    "success": true,
+    "data": {
+        "data": [
+            {
+                "id": "user-uuid",
+                "name": "John Doe",
+                "email": "john@example.com",
+                "role": "user",
+                "createdAt": "2024-01-01T00:00:00.000Z",
+                "addresses": []
+            }
+        ],
+        "items": 25,
+        "pages": 3
+    }
+}
+```
+
+#### Get Current User
+
+```
+GET /api/users/me
+```
+
+**Response:**
+
+```json
+{
+    "success": true,
+    "data": {
+        "id": "user-uuid",
+        "name": "John Doe",
+        "email": "john@example.com",
+        "role": "user",
+        "createdAt": "2024-01-01T00:00:00.000Z",
+        "addresses": [
+            {
+                "id": "address-uuid",
+                "alias": "Home",
+                "fullName": "John Doe",
+                "street": "123 Main St",
+                "city": "New York",
+                "state": "NY",
+                "zip": "10001",
+                "phone": "+1234567890",
+                "type": "home",
+                "isPrimary": true
+            }
+        ]
+    }
+}
+```
+
+### User Addresses
+
+Manage user shipping and billing addresses.
+
+#### Create Address
+
+```
+POST /api/users/u/[uId]/addresses
+```
+
+**Request Body:**
+
+```json
+{
+    "alias": "Home",
+    "fullName": "John Doe",
+    "street": "123 Main Street",
+    "city": "New York",
+    "state": "NY",
+    "zip": "10001",
+    "phone": "+1234567890",
+    "type": "home",
+    "isPrimary": true
+}
+```
+
+**Response:**
+
+```json
+{
+    "success": true,
+    "message": "CREATED",
+    "data": {
+        "id": "address-uuid",
+        "alias": "Home",
+        "aliasSlug": "home",
+        "fullName": "John Doe",
+        "street": "123 Main Street",
+        "city": "New York",
+        "state": "NY",
+        "zip": "10001",
+        "phone": "+1234567890",
+        "type": "home",
+        "isPrimary": true,
+        "userId": "user-uuid"
+    }
+}
+```
+
+#### Update Address
+
+```
+PATCH /api/users/u/[uId]/addresses/[aId]
+```
+
+**Request Body:** (Same as create address)
+
+#### Delete Address
+
+```
+DELETE /api/users/u/[uId]/addresses/[aId]
+```
+
+**Notes:**
+
+- Cannot delete primary address
+- User must have at least one address
+- Admin role required for deletion
 
 ### Shopping Cart
 
