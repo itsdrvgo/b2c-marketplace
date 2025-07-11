@@ -101,7 +101,7 @@ button {
 }
 
 :root {
-    --card: oklch(1 0 0);
+    --card: oklch(100% 0.00011 271.152);
     --card-foreground: oklch(0.145 0 0);
 
     --popover: oklch(1 0 0);
@@ -113,11 +113,11 @@ button {
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
 
-    --muted: oklch(0.97 0 0);
+    --muted: oklch(87.302% 0.0001 271.152);
     --muted-foreground: oklch(0.556 0 0);
 
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
+    --accent: oklch(58.707% 0.11703 250.491);
+    --accent-foreground: oklch(0.208 0.042 265.755);
 
     --destructive: oklch(0.577 0.245 27.325);
     --destructive-foreground: oklch(0.577 0.245 27.325);
@@ -145,7 +145,7 @@ button {
 
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
-    --background: oklch(1 0 0);
+    --background: oklch(87.61% 0.0001 271.152);
     --foreground: oklch(0.145 0 0);
 }
 

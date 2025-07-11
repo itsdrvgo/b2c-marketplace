@@ -1,5 +1,7 @@
 import {
     DollarSign,
+    Eye,
+    EyeOff,
     Facebook,
     Github,
     Instagram,
@@ -15,6 +17,8 @@ import {
 export type Icon = LucideIcon;
 
 export const Icons = {
+    EyeOff,
+    Eye,
     User,
     DollarSign,
     LifeBuoy,
