@@ -41,7 +41,7 @@ class MeditaItemQuery {
     async update(id: string, values: UpdateMediaItem) {
         const data = await db
             .update(mediaItems)
-            .set(values)
+            .set({ ...values, updatedAt: new Date() })
             .where(eq(mediaItems.id, id))
             .returning()
             .then((res) => res[0]);

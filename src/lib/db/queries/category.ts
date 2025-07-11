@@ -60,7 +60,7 @@ class CategoryQuery {
     async update(id: string, values: UpdateCategory & { slug: string }) {
         const data = await db
             .update(categories)
-            .set(values)
+            .set({ ...values, updatedAt: new Date() })
             .where(eq(categories.id, id))
             .returning()
             .then((res) => res[0]);
