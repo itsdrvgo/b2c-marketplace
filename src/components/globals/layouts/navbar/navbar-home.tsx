@@ -15,6 +15,7 @@ import {
 import { siteConfig } from "@/config/site";
 import { useAuth } from "@/lib/react-query";
 import { useNavbarStore } from "@/lib/store";
+import { cn } from "@/lib/utils";
 import { motion, useMotionValueEvent, useScroll } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
@@ -53,10 +54,15 @@ export function NavbarHome() {
                 duration: 0.35,
                 ease: "easeInOut",
             }}
-            className="sticky inset-x-0 top-0 z-50 flex h-auto w-full items-center justify-center bg-transparent p-4 px-3"
+            className="sticky inset-x-0 top-0 z-50 flex h-auto w-full items-center justify-center bg-background"
             data-menu-open={isMenuOpen}
         >
-            <nav className="relative z-10 flex w-full max-w-5xl items-center justify-between gap-5 overflow-hidden rounded-2xl bg-card/80 p-4 shadow-md backdrop-blur-sm md:px-8 xl:max-w-7xl">
+            <nav
+                className={cn(
+                    "relative z-10 flex w-full max-w-5xl items-center justify-between gap-5 overflow-hidden p-4 md:px-8 xl:max-w-[100rem]",
+                    isMenuOpen && "border-b"
+                )}
+            >
                 <Link
                     href="/"
                     className="flex items-center gap-2 text-2xl font-bold"

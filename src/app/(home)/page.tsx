@@ -1,5 +1,13 @@
 import { GeneralShell } from "@/components/globals/layouts";
+import { Landing, Showcase } from "@/components/home";
 
 export default function Page() {
-    return <GeneralShell>Hello</GeneralShell>;
+    return (
+        <>
+            <Landing />
+            <GeneralShell>
+                <Showcase />
+            </GeneralShell>
+        </>
+    );
 }

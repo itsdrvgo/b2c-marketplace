@@ -11,6 +11,7 @@ import {
     FileText,
     Github,
     GripVertical,
+    Heart,
     Image,
     Instagram,
     LayoutDashboard,
@@ -38,6 +39,7 @@ import {
 export type Icon = LucideIcon;
 
 export const Icons = {
+    Heart,
     Lock,
     Unlock,
     Pencil,

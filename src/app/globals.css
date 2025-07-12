@@ -252,6 +252,14 @@ h3.tiptap-heading + h2.tiptap-heading {
     margin: 0;
 }
 
+.rfm-marquee-container {
+    @apply bg-primary py-2 text-primary-foreground;
+}
+
+.rfm-child {
+    @apply mr-5 md:mr-10;
+}
+
 @layer base {
     * {
         @apply border-border;

@@ -9,6 +9,16 @@ const nextConfig: NextConfig = {
                 hostname: "x6bo3x9qkp.ufs.sh",
                 pathname: "/f/**",
             },
+            {
+                protocol: "https",
+                hostname: "plus.unsplash.com",
+                pathname: "/**",
+            },
+            {
+                protocol: "https",
+                hostname: "images.unsplash.com",
+                pathname: "/**",
+            },
         ],
     },
 };
