@@ -101,7 +101,7 @@ button {
 }
 
 :root {
-    --card: oklch(100% 0.00011 271.152);
+    --card: oklch(86.686% 0.0001 271.152);
     --card-foreground: oklch(0.145 0 0);
 
     --popover: oklch(1 0 0);
@@ -145,7 +145,7 @@ button {
 
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
-    --background: oklch(87.61% 0.0001 271.152);
+    --background: oklch(99.107% 0.00011 271.152);
     --foreground: oklch(0.145 0 0);
 }
 

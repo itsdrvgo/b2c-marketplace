@@ -23,6 +23,10 @@ export default clerkMiddleware(async (auth, req) => {
             return NextResponse.redirect(new URL("/", url));
 
         if (url.pathname.startsWith("/dashboard")) {
+            if (url.pathname === "/dashboard")
+                return NextResponse.redirect(
+                    new URL("/dashboard/products", url)
+                );
         }
     } else {
         if (url.pathname.startsWith("/dashboard"))

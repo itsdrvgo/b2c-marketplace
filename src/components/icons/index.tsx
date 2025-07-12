@@ -1,15 +1,20 @@
 import {
+    Check,
     ChevronRight,
     DollarSign,
     Eye,
     EyeOff,
     Facebook,
     Github,
+    GripVertical,
     Instagram,
+    LayoutDashboard,
     LifeBuoy,
     Linkedin,
     LogOut,
     Menu,
+    Plus,
+    PlusCircle,
     Store,
     Twitter,
     User,
@@ -22,6 +27,11 @@ import {
 export type Icon = LucideIcon;
 
 export const Icons = {
+    Plus,
+    Check,
+    PlusCircle,
+    GripVertical,
+    LayoutDashboard,
     Store,
     ChevronRight,
     User2,

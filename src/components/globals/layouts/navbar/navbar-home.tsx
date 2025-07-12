@@ -143,6 +143,18 @@ export function NavbarHome() {
                                         <DropdownMenuSeparator />
 
                                         <DropdownMenuGroup>
+                                            {user.role !== "user" && (
+                                                <DropdownMenuItem asChild>
+                                                    <Link
+                                                        href="/dashboard"
+                                                        prefetch
+                                                    >
+                                                        <Icons.LayoutDashboard className="size-4" />
+                                                        <span>Dashboard</span>
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                            )}
+
                                             <DropdownMenuItem asChild>
                                                 <Link href="/contact">
                                                     <Icons.LifeBuoy className="size-4" />
