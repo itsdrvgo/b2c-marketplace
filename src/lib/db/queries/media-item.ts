@@ -14,7 +14,7 @@ class MeditaItemQuery {
 
     async scan(ids: string[] = []) {
         const data = await db.query.mediaItems.findMany({
-            where: (f, o) => o.inArray(f.id, ids),
+            where: (f, o) => (!!ids.length ? o.inArray(f.id, ids) : undefined),
         });
 
         return data.sort(

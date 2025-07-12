@@ -33,7 +33,6 @@ import {
 import { useProduct } from "@/lib/react-query";
 import {
     convertCentToDollar,
-    convertDollarToCent,
     convertValueToLabel,
     formatPriceTag,
 } from "@/lib/utils";
@@ -49,6 +48,7 @@ import {
 import { format } from "date-fns";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { useMemo, useState } from "react";
+import { ProductAction } from "./product-action";
 
 interface PageProps {
     initialData: {
@@ -58,7 +58,7 @@ interface PageProps {
     };
 }
 
-export type TableProduct = FullProduct;
+export type TableProduct = FullProduct & { stock: number };
 
 const columns: ColumnDef<TableProduct>[] = [
     {
@@ -116,11 +116,11 @@ const columns: ColumnDef<TableProduct>[] = [
             const maxPriceRaw = Math.max(...data.variants.map((x) => x.price));
 
             const minPrice = formatPriceTag(
-                convertDollarToCent(minPriceRaw),
+                convertCentToDollar(minPriceRaw),
                 true
             );
             const maxPrice = formatPriceTag(
-                convertDollarToCent(maxPriceRaw),
+                convertCentToDollar(maxPriceRaw),
                 true
             );
 
@@ -311,12 +311,12 @@ const columns: ColumnDef<TableProduct>[] = [
         cell: ({ row }) =>
             format(new Date(row.original.createdAt), "MMM dd, yyyy"),
     },
-    // {
-    //     id: "actions",
-    //     cell: ({ row }) => <ClientAction data={row.original} />,
-    //     enableSorting: false,
-    //     enableHiding: false,
-    // },
+    {
+        id: "actions",
+        cell: ({ row }) => <ProductAction data={row.original} />,
+        enableSorting: false,
+        enableHiding: false,
+    },
 ];
 
 export function ProductsTable({ initialData }: PageProps) {
@@ -363,9 +363,16 @@ export function ProductsTable({ initialData }: PageProps) {
     const data = useMemo(
         () => ({
             ...dataRaw,
-            data: dataRaw?.data.map((d) => ({
-                ...d,
-            })),
+            data: dataRaw?.data.map((d) => {
+                const stock = d.productHasVariants
+                    ? d.variants.reduce((acc, curr) => acc + curr.quantity, 0)
+                    : (d.quantity ?? 0);
+
+                return {
+                    ...d,
+                    stock,
+                };
+            }),
         }),
         [dataRaw]
     );

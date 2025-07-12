@@ -261,7 +261,7 @@ export function ProductManageForm({
 
                         return product
                             ? update({ id: product.id, values })
-                            : create(values);
+                            : create([values]);
                     })}
                 >
                     <Card>

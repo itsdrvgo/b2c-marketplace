@@ -85,7 +85,10 @@ export function MediaSelectModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="max-w-4xl">
+            <DialogContent
+                className="max-w-4xl"
+                onInteractOutside={(e) => e.preventDefault()}
+            >
                 <DialogHeader>
                     <DialogTitle>Select file</DialogTitle>
                     <DialogDescription>

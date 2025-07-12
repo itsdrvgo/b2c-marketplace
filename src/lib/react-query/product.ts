@@ -54,8 +54,8 @@ export function useProduct() {
                 const toastId = toast.loading("Adding new product...");
                 return { toastId };
             },
-            mutationFn: async (values: CreateProduct) => {
-                const response = await axios.post<ResponseData<Product>>(
+            mutationFn: async (values: CreateProduct[]) => {
+                const response = await axios.post<ResponseData<Product[]>>(
                     "/products",
                     values
                 );

@@ -1,13 +1,11 @@
 import { z } from "zod";
 import { convertEmptyStringToNull } from "../utils";
-import { generateDateSchema, generateIdSchema, idSchema } from "./general";
+import { generateDateSchema, idSchema } from "./general";
+import { userSchema } from "./user";
 
 export const mediaItemSchema = z.object({
     id: idSchema,
-    uploaderId: generateIdSchema({
-        invalid_type_error: "Uploader ID must be a string",
-        required_error: "Uploader ID is required",
-    }).nullable(),
+    uploaderId: userSchema.shape.id,
     url: z
         .string({
             required_error: "Media URL is required",

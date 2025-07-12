@@ -71,10 +71,7 @@ export const productSchema = z.object({
             .min(3, "Description must be at least 3 characters long")
             .nullable()
     ),
-    uploaderId: generateIdSchema({
-        invalid_type_error: "Uploader ID must be a string",
-        required_error: "Uploader ID is required",
-    }),
+    uploaderId: userSchema.shape.id,
     isAvailable: z.boolean({
         required_error: "Availability is required",
         invalid_type_error: "Availability must be a boolean",

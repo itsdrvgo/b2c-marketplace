@@ -16,13 +16,17 @@ import {
     LayoutDashboard,
     LifeBuoy,
     Linkedin,
+    Lock,
     LogOut,
     Menu,
+    MoreVertical,
+    Pencil,
     Plus,
     PlusCircle,
     Store,
     Trash2,
     Twitter,
+    Unlock,
     Upload,
     User,
     User2,
@@ -34,6 +38,10 @@ import {
 export type Icon = LucideIcon;
 
 export const Icons = {
+    Lock,
+    Unlock,
+    Pencil,
+    MoreVertical,
     Image,
     Upload,
     Download,

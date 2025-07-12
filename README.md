@@ -273,7 +273,7 @@ GET /api/products
                 "categoryId": "category-uuid",
                 "subcategoryId": "subcategory-uuid",
                 "productTypeId": "product-type-uuid",
-                "uploaderId": "user-uuid",
+                "uploaderId": "user-id",
                 "media": [
                     {
                         "id": "media-uuid",
