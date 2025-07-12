@@ -101,7 +101,7 @@ button {
 }
 
 :root {
-    --card: oklch(86.686% 0.0001 271.152);
+    --card: oklch(100% 0.00011 271.152);
     --card-foreground: oklch(0.145 0 0);
 
     --popover: oklch(1 0 0);
@@ -195,6 +195,61 @@ button {
 
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
+}
+
+.ProseMirror {
+    outline: none !important;
+}
+
+h1.tiptap-heading {
+    @apply mt-8 mb-6 text-4xl font-bold;
+}
+
+h2.tiptap-heading {
+    @apply mt-6 mb-4 text-3xl font-bold;
+}
+
+h3.tiptap-heading {
+    @apply mt-4 mb-3 text-xl font-bold;
+}
+
+h1.tiptap-heading:first-child,
+h2.tiptap-heading:first-child,
+h3.tiptap-heading:first-child {
+    margin-top: 0;
+}
+
+h1.tiptap-heading + h2.tiptap-heading,
+h1.tiptap-heading + h3.tiptap-heading,
+h2.tiptap-heading + h1.tiptap-heading,
+h2.tiptap-heading + h3.tiptap-heading,
+h3.tiptap-heading + h1.tiptap-heading,
+h3.tiptap-heading + h2.tiptap-heading {
+    margin-top: 0;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+    @apply pointer-events-none float-left h-0 text-accent-foreground;
+    content: attr(data-placeholder);
+}
+
+.tiptap ul,
+.tiptap ol {
+    padding: 0 1rem;
+}
+
+.tiptap a {
+    @apply cursor-pointer text-blue-600 underline;
+}
+
+.tiptap blockquote {
+    border-left: 3px solid gray;
+    margin: 1.5rem 0;
+    padding-left: 1rem;
+}
+
+.prose p {
+    margin: 0;
 }
 
 @layer base {
