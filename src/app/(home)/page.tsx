@@ -5,7 +5,12 @@ export default function Page() {
     return (
         <>
             <Landing />
-            <GeneralShell>
+            <GeneralShell
+                classNames={{
+                    mainWrapper: "mt-20",
+                    innerWrapper: "xl:max-w-[100rem]",
+                }}
+            >
                 <Showcase />
             </GeneralShell>
         </>

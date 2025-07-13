@@ -231,9 +231,9 @@ export function convertCentToDollar(cent: number) {
 }
 
 export function formatPriceTag(price: number, keepDeciamls = false) {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
         style: "currency",
-        currency: "USD",
+        currency: "INR",
         minimumFractionDigits: keepDeciamls ? 2 : 0,
     }).format(price);
 }

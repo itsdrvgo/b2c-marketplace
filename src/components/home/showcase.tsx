@@ -14,6 +14,10 @@ export function Showcase({ className, ...props }: GenericProps) {
         limit: 3,
         page: 1,
         enabled: true,
+        verificationStatus: "approved",
+        isPublished: true,
+        isAvailable: true,
+        isActive: true,
     });
 
     const products = productsData?.data || [];
@@ -21,13 +25,13 @@ export function Showcase({ className, ...props }: GenericProps) {
     return (
         <div
             className={cn(
-                "grid grid-cols-1 items-center gap-12 lg:grid-cols-2",
+                "grid grid-cols-1 items-center gap-12 lg:grid-cols-5",
                 className
             )}
             {...props}
         >
             {/* Left Section - Text Area */}
-            <div className="flex-1 space-y-6">
+            <div className="col-span-2 flex-1 space-y-6">
                 <div className="space-y-4">
                     <h2 className="text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
                         Shop New Arrivals
@@ -47,13 +51,13 @@ export function Showcase({ className, ...props }: GenericProps) {
             </div>
 
             {/* Right Section - Product Grid */}
-            <div className="flex-1">
+            <div className="col-span-3 flex-1">
                 {isLoading ? (
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {[...Array(3)].map((_, index) => (
                             <div
                                 key={index}
-                                className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
+                                className="overflow-hidden rounded-lg"
                             >
                                 {/* Image skeleton */}
                                 <div className="aspect-[4/5] animate-pulse bg-gradient-to-br from-gray-100 to-gray-200" />
@@ -110,13 +114,13 @@ export function Showcase({ className, ...props }: GenericProps) {
                                     true
                                 );
 
-                                priceDisplay = `From ${minPrice}`;
+                                priceDisplay = minPrice;
                             }
 
                             return (
                                 <div
                                     key={product.id}
-                                    className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                                    className="group relative overflow-hidden rounded-lg transition-all duration-300 hover:-translate-y-1"
                                 >
                                     {/* Product Image */}
                                     <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
@@ -143,11 +147,13 @@ export function Showcase({ className, ...props }: GenericProps) {
                                     </div>
 
                                     {/* Product Info */}
-                                    <div className="space-y-3 p-5">
+                                    <div className="space-y-3 py-5">
                                         {/* Title and Price */}
                                         <div className="space-y-2">
                                             <h3 className="line-clamp-2 text-base leading-tight font-semibold text-gray-900">
-                                                {product.title}
+                                                {product.title.length > 26
+                                                    ? `${product.title.slice(0, 26)}...`
+                                                    : product.title}
                                             </h3>
                                             <div className="flex items-center justify-between">
                                                 <p className="text-xl font-bold text-gray-900">

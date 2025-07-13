@@ -15,7 +15,6 @@ export async function GET() {
 
         return CResponse({ data });
     } catch (err) {
-        console.error(err);
         return handleError(err);
     }
 }

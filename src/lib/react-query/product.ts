@@ -26,16 +26,78 @@ export function useProduct() {
         limit?: number;
         page?: number;
         search?: string;
+        minPrice?: number;
+        maxPrice?: number;
+        categoryId?: string;
+        subcategoryId?: string;
+        productTypeId?: string;
+        isActive?: boolean;
+        isAvailable?: boolean;
+        isPublished?: boolean;
+        isDeleted?: boolean;
+        verificationStatus?: Product["verificationStatus"];
+        sortBy?: "price" | "createdAt";
+        sortOrder?: "asc" | "desc";
         initialData?: T;
         enabled?: boolean;
     }) => {
-        const { limit, page, search, ...rest } = input;
+        const {
+            limit,
+            page,
+            search,
+            minPrice,
+            maxPrice,
+            categoryId,
+            subcategoryId,
+            productTypeId,
+            isActive,
+            isAvailable,
+            isPublished,
+            isDeleted,
+            verificationStatus,
+            sortBy,
+            sortOrder,
+            ...rest
+        } = input;
 
         return useQuery({
-            queryKey: ["products", limit, page, search],
+            queryKey: [
+                "products",
+                limit,
+                page,
+                search,
+                minPrice,
+                maxPrice,
+                categoryId,
+                subcategoryId,
+                productTypeId,
+                isActive,
+                isAvailable,
+                isPublished,
+                isDeleted,
+                verificationStatus,
+                sortBy,
+                sortOrder,
+            ],
             queryFn: async () => {
                 const response = await axios.get<ResponseData<T>>("/products", {
-                    params: { limit, page, search },
+                    params: {
+                        limit,
+                        page,
+                        search,
+                        minPrice,
+                        maxPrice,
+                        categoryId,
+                        subcategoryId,
+                        productTypeId,
+                        isActive,
+                        isAvailable,
+                        isPublished,
+                        isDeleted,
+                        verificationStatus,
+                        sortBy,
+                        sortOrder,
+                    },
                 });
                 if (!response.data.success)
                     throw new Error(response.data.longMessage);
